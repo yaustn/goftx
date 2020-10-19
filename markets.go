@@ -12,7 +12,7 @@ const (
 )
 
 // GetMarket will take a market pair and return a Market's state.
-// https://ftx.com/api/markets/BTC/USD
+// See https://ftx.com/api/markets/BTC/USD
 func (c *Client) GetMarket(marketName string) (market *model.Market, err error) {
 	getMarketURL := apiURL + getMarketsEndpoint + "/" + marketName
 
@@ -37,7 +37,7 @@ func (c *Client) GetMarket(marketName string) (market *model.Market, err error) 
 }
 
 // GetMarkets returns a list of all Market states on FTX.
-// https://ftx.com/api/markets
+// See https://ftx.com/api/markets
 func (c *Client) GetMarkets() (markets *[]model.Market, err error) {
 	getMarketsURL := apiURL + getMarketsEndpoint
 

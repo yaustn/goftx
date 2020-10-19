@@ -10,7 +10,7 @@ go get -u github.com/yaustn/goftx
 
 Example usage
 ```
-go run cmd/example.go
+go run example/main.go
 ```
 
 ## todo
