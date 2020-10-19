@@ -10,5 +10,8 @@ func main() {
 	client := goftx.NewClient()
 
 	market, _ := client.GetMarket("BTC/USD")
-	log.Printf("GetMarkets: %+v", market)
+	log.Printf("GetMarket BTC/USD: %+v", market)
+
+	markets, _ := client.GetMarkets()
+	log.Printf("GetMarkets: %+v", markets)
 }

@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	url = "https://ftx.com/api/"
+	apiURL = "https://ftx.com/api"
 )
 
 // Client is a
