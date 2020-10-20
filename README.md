@@ -13,5 +13,9 @@ Example usage
 go run example/main.go
 ```
 
+## Authentication
+Create a `secrets.yml` file 
+
 ## todo
-- Add authentication
+- POST requests (add an order)
+- Add support for Subaccounts

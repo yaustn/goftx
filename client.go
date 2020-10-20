@@ -2,33 +2,41 @@ package goftx
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 const (
-	apiURL = "https://ftx.com/api"
+	apiURL = "https://ftx.us/api"
 )
 
-// Client is a
+// Client for interfacing with the FTX REST api.
 type Client struct {
-	client *http.Client
-	apiKey string
-
-	lastRequestTimestamp string
+	client    *http.Client
+	apiKey    string
+	apiSecret string
 }
 
-// NewClient returns a client to make requests to FTX's REST api
-func NewClient() *Client {
+// NewClient returns a client given an api key and secret.
+func NewClient(key, secret string) *Client {
 	client := &http.Client{}
 
 	return &Client{
-		client: client,
+		client:    client,
+		apiKey:    key,
+		apiSecret: secret,
 	}
 }
 
-func (c *Client) get(url string) ([]byte, error) {
-	req, _ := http.NewRequest("GET", url, bytes.NewBuffer([]byte{}))
+// func NewClient(filepath string) *Client {}
+
+func (c *Client) get(endpoint string) ([]byte, error) {
+	req := c.buildSignedRequest("GET", endpoint, []byte{})
 
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -42,6 +50,27 @@ func (c *Client) get(url string) ([]byte, error) {
 	}
 
 	return respBody, nil
+}
+
+// See https://docs.ftx.com/#authentication
+func (c *Client) buildSignedRequest(method, endpoint string, body []byte) *http.Request {
+	// Get the current epoch ms timestamp
+	ts := strconv.FormatInt(time.Now().UTC().Unix()*1000, 10)
+
+	// SHA256 HMAC of concatenated string request encoded with the client's api secret
+	signaturePayload := ts + method + endpoint + string(body)
+	mac := hmac.New(sha256.New, []byte(c.apiSecret))
+	mac.Write([]byte(signaturePayload))
+	signature := hex.EncodeToString(mac.Sum(nil))
+
+	// Create and sign the http request
+	req, _ := http.NewRequest(method, apiURL+endpoint, bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("FTX-KEY", c.apiKey)
+	req.Header.Set("FTX-SIGN", signature)
+	req.Header.Set("FTX-TS", ts)
+
+	return req
 }
 
 /*
