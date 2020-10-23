@@ -19,7 +19,7 @@ func (c *Client) GetBalances() (balances *[]model.Balance, err error) {
 		return balances, err
 	}
 
-	log.Printf("BALANCES: %s", string(respBytes))
+	log.Printf("GetbalanceResponse: %s", string(respBytes))
 
 	response := new(model.Response)
 	response.Result = new([]model.Balance)

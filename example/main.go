@@ -18,13 +18,13 @@ func main() {
 	secretsFile, _ := ioutil.ReadFile("config")
 	_ = yaml.Unmarshal(secretsFile, &secrets)
 
-	client := goftx.NewClient(secrets.Secret, secrets.Key)
+	client := goftx.NewClient(secrets.Key, secrets.Secret)
 
-	market, _ := client.GetMarket("BTC/USD")
-	log.Printf("GetMarket BTC/USD: %+v", market)
+	//market, _ := client.GetMarket("BTC/USD")
+	//log.Printf("GetMarket BTC/USD: %+v", market)
 
-	markets, _ := client.GetMarkets()
-	log.Printf("GetMarkets: %+v", markets)
+	//markets, _ := client.GetMarkets()
+	//log.Printf("GetMarkets: %+v", markets)
 
 	balance, _ := client.GetBalances()
 	log.Printf("GetBalance: %+v", balance)
