@@ -1,7 +1,5 @@
 package model
 
-// Market represents an FTX market
-// See https://docs.ftx.com/#get-markets
 type Market struct {
 	Type           string  `json:"type"`
 	Name           string  `json:"name"`

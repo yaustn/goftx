@@ -1,6 +1,8 @@
 # goftx
 A Golang implementation of the ![FTX REST API specification](https://docs.ftx.com/#overview).
 
+This package is currently still in alpha. It is the minimally necessary endpoints to get a basic market maker or algorithmic trading bot stood up.
+
 ## Usage
 
 Import the package
@@ -13,9 +15,7 @@ Example usage
 go run example/main.go
 ```
 
-## Authentication
-Create a `secrets.yml` file 
-
 ## todo
-- POST requests (add an order)
 - Add support for Subaccounts
+- Make request creation more generic
+- Add additional endpoints

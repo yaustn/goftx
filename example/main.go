@@ -20,12 +20,21 @@ func main() {
 
 	client := goftx.NewClient(secrets.Key, secrets.Secret)
 
-	//market, _ := client.GetMarket("BTC/USD")
-	//log.Printf("GetMarket BTC/USD: %+v", market)
+	market, _ := client.GetMarket("BTC/USD")
+	log.Printf("GetMarket BTC/USD: %+v", market)
 
 	//markets, _ := client.GetMarkets()
 	//log.Printf("GetMarkets: %+v", markets)
 
-	balance, _ := client.GetBalances()
-	log.Printf("GetBalance: %+v", balance)
+	balances, _ := client.GetBalances()
+	log.Printf("GetBalances: %+v", balances)
+
+	// coins, _ := client.GetCoins()
+	// log.Printf("GetCoins: %+v", coins)
+
+	orders, _ := client.GetOrders()
+	log.Printf("GetOrders: %+v", orders)
+
+	btcOrders, _ := client.GetOrdersByMarket("BTC/USD")
+	log.Printf("GetOrdersByMarket: %+v", btcOrders)
 }
