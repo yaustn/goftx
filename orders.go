@@ -31,7 +31,7 @@ func (c *Client) GetOrders() (orders *[]model.Order, err error) {
 
 func (c *Client) GetOrdersByMarket(marketName string) (orders *[]model.Order, err error) {
 	respBytes, err := c.get(ordersEndpoint +
-		"/?market=" + marketName)
+		"?market=" + marketName)
 	if err != nil {
 		return orders, err
 	}

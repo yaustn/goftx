@@ -12,59 +12,38 @@ import (
 )
 
 const (
+	// MaxRequestsPerSecond defines the rate at which FTX will accept requests.
+	// Throughput beyond this will result in FTX returning HTTP 429 errors.
+	MaxRequestsPerSecond = 30
+
 	apiURL = "https://ftx.us/api"
 )
 
 // Client for interfacing with the FTX REST api.
 type Client struct {
-	client    *http.Client
-	apiKey    string
-	apiSecret string
+	client       *http.Client
+	ftxAPIKey    string
+	ftxAPISecret string
 }
 
-// NewClient returns a client given an api key and secret.
-func NewClient(key, secret string) *Client {
+func NewClient(ftxAPIKey, ftxAPISecret string) *Client {
 	client := &http.Client{}
 
 	return &Client{
-		client:    client,
-		apiKey:    key,
-		apiSecret: secret,
+		client:       client,
+		ftxAPIKey:    ftxAPIKey,
+		ftxAPISecret: ftxAPISecret,
 	}
 }
 
 func (c *Client) get(endpoint string) ([]byte, error) {
 	req := c.buildSignedRequest("GET", endpoint, []byte{})
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return respBody, nil
+	return c.doReq(req)
 }
 
 func (c *Client) post(endpoint string) ([]byte, error) {
 	req := c.buildSignedRequest("POST", endpoint, []byte{})
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return respBody, nil
+	return c.doReq(req)
 }
 
 // See https://docs.ftx.com/#authentication
@@ -79,16 +58,31 @@ func (c *Client) buildSignedRequest(method, endpoint string, body []byte) *http.
 	// Create and sign the http request
 	req, _ := http.NewRequest(method, apiURL+endpoint, bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("FTXUS-KEY", c.apiKey)
+	req.Header.Set("FTXUS-KEY", c.ftxAPIKey)
 	req.Header.Set("FTXUS-SIGN", signature)
 	req.Header.Set("FTXUS-TS", nonce)
 
 	return req
 }
 
-// sign takes in a string and returns the SHA256 HMAC using the client's apiSecret
+func (c *Client) doReq(req *http.Request) ([]byte, error) {
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return respBody, nil
+}
+
+// sign takes in a string and returns the SHA256 HMAC using the client's ftxAPISecret
 func (c *Client) sign(payload string) string {
-	mac := hmac.New(sha256.New, []byte(c.apiSecret))
+	mac := hmac.New(sha256.New, []byte(c.ftxAPISecret))
 	mac.Write([]byte(payload))
 	signature := hex.EncodeToString(mac.Sum(nil))
 
