@@ -5,10 +5,13 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/yaustn/goftx/model"
 )
 
 const (
@@ -36,14 +39,42 @@ func NewClient(ftxAPIKey, ftxAPISecret string) *Client {
 	}
 }
 
-func (c *Client) get(endpoint string) ([]byte, error) {
+func (c *Client) do(req *http.Request) ([]byte, error) {
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return respBody, nil
+}
+
+func (c *Client) get(endpoint string, result interface{}) error {
+	response := new(model.Response)
+	response.Result = result
+
 	req := c.buildSignedRequest("GET", endpoint, []byte{})
-	return c.doReq(req)
+	respBytes, err := c.do(req)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(respBytes, response)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) post(endpoint string) ([]byte, error) {
 	req := c.buildSignedRequest("POST", endpoint, []byte{})
-	return c.doReq(req)
+	return c.do(req)
 }
 
 // See https://docs.ftx.com/#authentication
@@ -63,21 +94,6 @@ func (c *Client) buildSignedRequest(method, endpoint string, body []byte) *http.
 	req.Header.Set("FTXUS-TS", nonce)
 
 	return req
-}
-
-func (c *Client) doReq(req *http.Request) ([]byte, error) {
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return respBody, nil
 }
 
 // sign takes in a string and returns the SHA256 HMAC using the client's ftxAPISecret

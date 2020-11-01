@@ -1,55 +1,32 @@
 package goftx
 
-import (
-	"encoding/json"
-
-	"github.com/yaustn/goftx/model"
-)
+import "github.com/yaustn/goftx/model"
 
 const (
 	marketsEndpoint = "/markets"
 )
 
-func (c *Client) GetMarket(marketName string) (market *model.Market, err error) {
-	respBytes, err := c.get(marketsEndpoint + "/" + marketName)
+func (c *Client) GetMarket(marketName string) (*model.Market, error) {
+	market := new(model.Market)
+	err := c.get(marketsEndpoint+"/"+marketName, market)
 	if err != nil {
-		return market, err
+		return nil, err
 	}
-
-	response := new(model.Response)
-	response.Result = new(model.Market)
-
-	err = json.Unmarshal(respBytes, response)
-	if err != nil {
-		return market, err
-	}
-
-	market = response.Result.(*model.Market)
 
 	return market, nil
 }
 
-func (c *Client) GetMarkets() (markets *[]model.Market, err error) {
-	respBytes, err := c.get(marketsEndpoint)
+func (c *Client) GetMarkets() (*[]model.Market, error) {
+	markets := new([]model.Market)
+	err := c.get(marketsEndpoint, markets)
 	if err != nil {
-		return markets, err
+		return nil, err
 	}
-
-	response := new(model.Response)
-	response.Result = new([]model.Market)
-
-	err = json.Unmarshal(respBytes, response)
-	if err != nil {
-		return markets, err
-	}
-
-	markets = response.Result.(*[]model.Market)
 
 	return markets, nil
 }
 
-/*
-func (c *Client) GetHistoricalMarket() {
-
-}
-*/
+// func (c *Client) GetHistoricalMarket() (*[]model.Market, error) {
+//	 markets := new([]model.Market)
+//
+// }

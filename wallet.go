@@ -1,8 +1,6 @@
 package goftx
 
 import (
-	"encoding/json"
-
 	"github.com/yaustn/goftx/model"
 )
 
@@ -12,40 +10,24 @@ const (
 	coinsEndpoint    = "/coins"
 )
 
-func (c *Client) GetBalances() (balances *[]model.Balance, err error) {
-	respBytes, err := c.get(walletRoute + balancesEndpoint)
+func (c *Client) GetBalances() (*[]model.Balance, error) {
+	balances := new([]model.Balance)
+	err := c.get(walletRoute+balancesEndpoint, balances)
 	if err != nil {
-		return balances, err
+		return nil, err
 	}
-
-	response := new(model.Response)
-	response.Result = new([]model.Balance)
-
-	err = json.Unmarshal(respBytes, response)
-	if err != nil {
-		return balances, err
-	}
-
-	balances = response.Result.(*[]model.Balance)
 
 	return balances, nil
+
 }
 
-func (c *Client) GetCoins() (coins *[]model.Coin, err error) {
-	respBytes, err := c.get(walletRoute + coinsEndpoint)
+func (c *Client) GetCoins() (*[]model.Coin, error) {
+	coins := new([]model.Coin)
+	err := c.get(walletRoute+coinsEndpoint, coins)
 	if err != nil {
-		return coins, err
+		return nil, err
 	}
-
-	response := new(model.Response)
-	response.Result = new([]model.Coin)
-
-	err = json.Unmarshal(respBytes, response)
-	if err != nil {
-		return coins, err
-	}
-
-	coins = response.Result.(*[]model.Coin)
 
 	return coins, nil
+
 }
