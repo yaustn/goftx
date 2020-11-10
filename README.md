@@ -10,12 +10,6 @@ Import the package
 go get -u github.com/yaustn/goftx
 ```
 
-Example usage
-```
-go run example/main.go
-```
-
 ## todo
 - Add support for Subaccounts
-- Make request creation more generic
 - Add additional endpoints

@@ -26,6 +26,7 @@ func (c *Client) GetMarkets() (*[]model.Market, error) {
 	return markets, nil
 }
 
+// todo
 // func (c *Client) GetHistoricalMarket() (*[]model.Market, error) {
 //	 markets := new([]model.Market)
 //

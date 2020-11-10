@@ -6,8 +6,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
@@ -15,9 +17,9 @@ import (
 )
 
 const (
-	// MaxRequestsPerSecond defines the rate at which FTX will accept requests.
+	// DefaultMaxRequestsPerSecond defines the rate at which FTX will accept requests.
 	// Throughput beyond this will result in FTX returning HTTP 429 errors.
-	MaxRequestsPerSecond = 30
+	DefaultMaxRequestsPerSecond = 30
 
 	apiURL = "https://ftx.us/api"
 )
@@ -67,14 +69,34 @@ func (c *Client) get(endpoint string, result interface{}) error {
 	err = json.Unmarshal(respBytes, response)
 	if err != nil {
 		return err
+	} else if !response.Success {
+		return errors.New(response.Error)
 	}
 
 	return nil
 }
 
-func (c *Client) post(endpoint string) ([]byte, error) {
-	req := c.buildSignedRequest("POST", endpoint, []byte{})
-	return c.do(req)
+func (c *Client) post(endpoint string, request []byte, result interface{}) error {
+	response := new(model.Response)
+	response.Result = result
+
+	req := c.buildSignedRequest("POST", endpoint, request)
+	respBytes, err := c.do(req)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(respBytes, response)
+	if err != nil {
+		log.Printf("Error")
+		return err
+	} else if !response.Success {
+		log.Printf("Unsuccess")
+		log.Printf(response.Error)
+		return errors.New(response.Error)
+	}
+
+	return nil
 }
 
 // See https://docs.ftx.com/#authentication

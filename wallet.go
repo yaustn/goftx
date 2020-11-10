@@ -18,7 +18,6 @@ func (c *Client) GetBalances() (*[]model.Balance, error) {
 	}
 
 	return balances, nil
-
 }
 
 func (c *Client) GetCoins() (*[]model.Coin, error) {
@@ -29,5 +28,4 @@ func (c *Client) GetCoins() (*[]model.Coin, error) {
 	}
 
 	return coins, nil
-
 }
