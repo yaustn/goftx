@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 
@@ -88,11 +87,8 @@ func (c *Client) post(endpoint string, request []byte, result interface{}) error
 
 	err = json.Unmarshal(respBytes, response)
 	if err != nil {
-		log.Printf("Error")
 		return err
 	} else if !response.Success {
-		log.Printf("Unsuccess")
-		log.Printf(response.Error)
 		return errors.New(response.Error)
 	}
 
@@ -118,7 +114,7 @@ func (c *Client) buildSignedRequest(method, endpoint string, body []byte) *http.
 	return req
 }
 
-// sign takes in a string and returns the SHA256 HMAC using the client's ftxAPISecret
+// sign takes in a string and returns the SHA256 HMAC using the client's api secret
 func (c *Client) sign(payload string) string {
 	mac := hmac.New(sha256.New, []byte(c.ftxAPISecret))
 	mac.Write([]byte(payload))

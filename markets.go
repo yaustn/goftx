@@ -7,17 +7,17 @@ const (
 )
 
 func (c *Client) GetMarket(marketName string) (*model.Market, error) {
-	market := new(model.Market)
+	var market model.Market
 	err := c.get(marketsEndpoint+"/"+marketName, market)
 	if err != nil {
 		return nil, err
 	}
 
-	return market, nil
+	return &market, nil
 }
 
-func (c *Client) GetMarkets() (*[]model.Market, error) {
-	markets := new([]model.Market)
+func (c *Client) GetMarkets() ([]model.Market, error) {
+	var markets []model.Market
 	err := c.get(marketsEndpoint, markets)
 	if err != nil {
 		return nil, err
@@ -25,6 +25,14 @@ func (c *Client) GetMarkets() (*[]model.Market, error) {
 
 	return markets, nil
 }
+
+// func (c *Client) GetOrderbook() () {
+//
+// }
+
+// func (c *Client) GetTrades() () {
+//
+//}
 
 // todo
 // func (c *Client) GetHistoricalMarket() (*[]model.Market, error) {

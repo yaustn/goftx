@@ -10,8 +10,8 @@ const (
 	coinsEndpoint    = "/coins"
 )
 
-func (c *Client) GetBalances() (*[]model.Balance, error) {
-	balances := new([]model.Balance)
+func (c *Client) GetBalances() ([]model.Balance, error) {
+	var balances []model.Balance
 	err := c.get(walletRoute+balancesEndpoint, balances)
 	if err != nil {
 		return nil, err
@@ -20,8 +20,8 @@ func (c *Client) GetBalances() (*[]model.Balance, error) {
 	return balances, nil
 }
 
-func (c *Client) GetCoins() (*[]model.Coin, error) {
-	coins := new([]model.Coin)
+func (c *Client) GetCoins() ([]model.Coin, error) {
+	var coins []model.Coin
 	err := c.get(walletRoute+coinsEndpoint, coins)
 	if err != nil {
 		return nil, err
