@@ -61,15 +61,17 @@ func (c *Client) PlaceOrder(market, side, _type string, price, size float64) (*m
 	return &order, nil
 }
 
-func (c *Client) CancelOrder(orderID int64) (bool, error) {
+func (c *Client) CancelOrder(orderID int64) error {
 	request, _ := json.Marshal(model.CancelOrderRequest{OrderID: orderID})
 	var result string
-	err := c.delete(ordersEndpoint, request, &result)
+	err := c.delete(ordersEndpoint+"/"+fmt.Sprintf("%d", orderID), request, &result)
+	fmt.Println("CancelOrder result: " + result)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	fmt.Println(result)
-
-	return false, nil
+	return nil
 }
+
+// func CancelAllOrders
+// func CancelAllOrdersBymarket
