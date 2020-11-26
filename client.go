@@ -40,52 +40,51 @@ func NewClient(ftxAPIKey, ftxAPISecret string) *Client {
 	}
 }
 
-func (c *Client) do(req *http.Request) ([]byte, error) {
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return respBody, nil
-}
-
 func (c *Client) get(endpoint string, result interface{}) error {
-	response := new(model.Response)
-	response.Result = result
-
-	req := c.buildSignedRequest("GET", endpoint, []byte{})
-	respBytes, err := c.do(req)
+	err := c.do("GET", endpoint, []byte{}, &result)
 	if err != nil {
 		return err
-	}
-
-	err = json.Unmarshal(respBytes, response)
-	if err != nil {
-		return err
-	} else if !response.Success {
-		return errors.New(response.Error)
 	}
 
 	return nil
 }
 
 func (c *Client) post(endpoint string, request []byte, result interface{}) error {
-	response := new(model.Response)
-	response.Result = result
-
-	req := c.buildSignedRequest("POST", endpoint, request)
-	respBytes, err := c.do(req)
+	err := c.do("POST", endpoint, request, &result)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(respBytes, response)
+	return nil
+}
+
+func (c *Client) delete(endpoint string, request []byte, result interface{}) error {
+	err := c.do("DELETE", endpoint, request, &result)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) do(method, endpoint string, request []byte, result interface{}) error {
+	response := new(model.Response)
+	response.Result = result
+
+	req := c.buildSignedRequest(method, endpoint, request)
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(respBody, response)
 	if err != nil {
 		return err
 	} else if !response.Success {

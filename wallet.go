@@ -12,7 +12,7 @@ const (
 
 func (c *Client) GetBalances() ([]model.Balance, error) {
 	var balances []model.Balance
-	err := c.get(walletRoute+balancesEndpoint, balances)
+	err := c.get(walletRoute+balancesEndpoint, &balances)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func (c *Client) GetBalances() ([]model.Balance, error) {
 
 func (c *Client) GetCoins() ([]model.Coin, error) {
 	var coins []model.Coin
-	err := c.get(walletRoute+coinsEndpoint, coins)
+	err := c.get(walletRoute+coinsEndpoint, &coins)
 	if err != nil {
 		return nil, err
 	}

@@ -34,3 +34,7 @@ type PlaceOrderRequest struct {
 	PostOnly   bool    `json:"postOnly,omitempty"`   // optional - default is false
 	ClientID   string  `json:"clientId,omitempty"`   // optional
 }
+
+type CancelOrderRequest struct {
+	OrderID int64 `json:"id"`
+}

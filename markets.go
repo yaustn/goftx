@@ -8,7 +8,7 @@ const (
 
 func (c *Client) GetMarket(marketName string) (*model.Market, error) {
 	var market model.Market
-	err := c.get(marketsEndpoint+"/"+marketName, market)
+	err := c.get(marketsEndpoint+"/"+marketName, &market)
 	if err != nil {
 		return nil, err
 	}
@@ -18,7 +18,7 @@ func (c *Client) GetMarket(marketName string) (*model.Market, error) {
 
 func (c *Client) GetMarkets() ([]model.Market, error) {
 	var markets []model.Market
-	err := c.get(marketsEndpoint, markets)
+	err := c.get(marketsEndpoint, &markets)
 	if err != nil {
 		return nil, err
 	}
