@@ -2,7 +2,7 @@ package goftx
 
 import (
 	"encoding/json"
-	"fmt"
+	"strconv"
 
 	"github.com/yaustn/goftx/model"
 )
@@ -61,17 +61,33 @@ func (c *Client) PlaceOrder(market, side, _type string, price, size float64) (*m
 	return &order, nil
 }
 
-func (c *Client) CancelOrder(orderID int64) error {
-	request, _ := json.Marshal(model.CancelOrderRequest{OrderID: orderID})
+func (c *Client) CancelOrder(orderID int64) (bool, error) {
 	var result string
-	err := c.delete(ordersEndpoint+"/"+fmt.Sprintf("%d", orderID), request, &result)
-	fmt.Println("CancelOrder result: " + result)
+	err := c.delete(ordersEndpoint+"/"+strconv.FormatInt(orderID, 10), []byte{}, &result)
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	return true, nil
 }
 
-// func CancelAllOrders
-// func CancelAllOrdersBymarket
+func (c *Client) CancelAllOrders() (bool, error) {
+	var result string
+	err := c.delete(ordersEndpoint, []byte{}, &result)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (c *Client) CancelAllOrdersByMarket(market string) (bool, error) {
+	request, _ := json.Marshal(model.CancelOrderRequest{Market: market})
+	var result string
+	err := c.delete(ordersEndpoint, request, &result)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}

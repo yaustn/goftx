@@ -36,5 +36,7 @@ type PlaceOrderRequest struct {
 }
 
 type CancelOrderRequest struct {
-	OrderID int64 `json:"id"`
+	Market          string `json:"market,omitempty"`
+	ConditionalOnly string `json:"conditionalOrdersOnly,omitempty"`
+	LimitOnly       string `json:"limitOrdersOnly,omitempty"`
 }
