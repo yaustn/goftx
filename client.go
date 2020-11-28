@@ -11,8 +11,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
-
-	"github.com/yaustn/goftx/model"
 )
 
 const (
@@ -22,6 +20,15 @@ const (
 
 	apiURL = "https://ftx.us/api"
 )
+
+// Response represents every FTX API response.
+// Response.Result is an interface specific to the request and should be
+// type-casted before use.
+type Response struct {
+	Success bool        `json:"success"`
+	Error   string      `json:"error,omitempty"`
+	Result  interface{} `json:"result,omitempty"`
+}
 
 // Client for interfacing with the FTX REST api.
 type Client struct {
@@ -68,7 +75,7 @@ func (c *Client) delete(endpoint string, request []byte, result interface{}) err
 }
 
 func (c *Client) do(method, endpoint string, request []byte, result interface{}) error {
-	response := new(model.Response)
+	response := new(Response)
 	response.Result = result
 
 	req := c.buildSignedRequest(method, endpoint, request)

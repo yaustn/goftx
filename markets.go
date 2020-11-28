@@ -1,13 +1,34 @@
 package goftx
 
-import "github.com/yaustn/goftx/model"
-
 const (
 	marketsEndpoint = "/markets"
 )
 
-func (c *Client) GetMarket(marketName string) (*model.Market, error) {
-	var market model.Market
+type Market struct {
+	Type           string  `json:"type"`
+	Name           string  `json:"name"`
+	BaseCurrency   string  `json:"baseCurrency"`
+	QuoteCurrency  string  `json:"quoteCurrency"`
+	Underlying     string  `json:"underlying"`
+	VolumeUsd24H   float64 `json:"volumeUsd24h"`
+	QuoteVolume24H float64 `json:"quoteVolume24h"`
+	Price          float64 `json:"price"`
+	Ask            float64 `json:"ask"`
+	Bid            float64 `json:"bid"`
+	Last           float64 `json:"last"`
+	PriceIncrement float64 `json:"priceIncrement"`
+	SizeIncrement  float64 `json:"sizeIncrement"`
+	MinProvideSize float64 `json:"minProvideSize"`
+	Change1H       float64 `json:"change1h"`
+	Change24H      float64 `json:"change24h"`
+	ChangeBody     float64 `json:"changeBod"`
+	Enabled        bool    `json:"enabled"`
+	Restricted     bool    `json:"restricted"`
+	PostOnly       bool    `json:"postOnly"`
+}
+
+func (c *Client) GetMarket(marketName string) (*Market, error) {
+	var market Market
 	err := c.get(marketsEndpoint+"/"+marketName, &market)
 	if err != nil {
 		return nil, err
@@ -16,8 +37,8 @@ func (c *Client) GetMarket(marketName string) (*model.Market, error) {
 	return &market, nil
 }
 
-func (c *Client) GetMarkets() ([]model.Market, error) {
-	var markets []model.Market
+func (c *Client) GetMarkets() ([]Market, error) {
+	var markets []Market
 	err := c.get(marketsEndpoint, &markets)
 	if err != nil {
 		return nil, err
