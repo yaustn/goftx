@@ -46,7 +46,7 @@ type PlaceOrderRequest struct {
 	ClientID   string  `json:"clientId,omitempty"`   // optional
 }
 
-type CancelOrderRequest struct {
+type CancelOrdersRequest struct {
 	Market          string `json:"market,omitempty"`
 	ConditionalOnly string `json:"conditionalOrdersOnly,omitempty"`
 	LimitOnly       string `json:"limitOrdersOnly,omitempty"`
@@ -82,22 +82,27 @@ func (c *Client) GetOrderHistoryByMarket(marketName string) ([]Order, error) {
 	return orders, nil
 }
 
-func (c *Client) PlaceOrder(market, side, _type string, price, size float64) (*Order, error) {
-	request, _ := json.Marshal(PlaceOrderRequest{
-		Market: market,
-		Side:   side,
-		Type:   _type,
-		Price:  price,
-		Size:   size,
-	})
+func (c *Client) PlaceOrder(request PlaceOrderRequest) (*Order, error) {
+	jsonRequest, _ := json.Marshal(request)
 
 	var order Order
-	err := c.post(ordersEndpoint, request, &order)
+	err := c.post(ordersEndpoint, jsonRequest, &order)
 	if err != nil {
 		return nil, err
 	}
 
 	return &order, nil
+}
+
+func (c *Client) CancelOrders(request CancelOrdersRequest) (bool, error) {
+	jsonRequest, _ := json.Marshal(request)
+	var result string
+	err := c.delete(ordersEndpoint, jsonRequest, &result)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (c *Client) CancelOrder(orderID int64) (bool, error) {
@@ -113,17 +118,6 @@ func (c *Client) CancelOrder(orderID int64) (bool, error) {
 func (c *Client) CancelAllOrders() (bool, error) {
 	var result string
 	err := c.delete(ordersEndpoint, []byte{}, &result)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func (c *Client) CancelAllOrdersByMarket(market string) (bool, error) {
-	request, _ := json.Marshal(CancelOrderRequest{Market: market})
-	var result string
-	err := c.delete(ordersEndpoint, request, &result)
 	if err != nil {
 		return false, err
 	}
