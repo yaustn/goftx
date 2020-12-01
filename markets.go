@@ -1,7 +1,12 @@
 package goftx
 
+import "strconv"
+
 const (
-	marketsEndpoint = "/markets"
+	marketsEndpoint   = "/markets"
+	orderbookEndpoint = "/orderbook"
+	tradesEndpoint    = "/trades"
+	candlesEndpoint   = "/candles"
 )
 
 type Market struct {
@@ -21,10 +26,52 @@ type Market struct {
 	MinProvideSize float64 `json:"minProvideSize"`
 	Change1H       float64 `json:"change1h"`
 	Change24H      float64 `json:"change24h"`
-	ChangeBody     float64 `json:"changeBod"`
+	ChangeBody     float64 `json:"changeBody"`
 	Enabled        bool    `json:"enabled"`
 	Restricted     bool    `json:"restricted"`
 	PostOnly       bool    `json:"postOnly"`
+}
+
+type Orderbook struct {
+	Asks [][]float64 `json:"asks"`
+	Bids [][]float64 `json:"bids"`
+}
+
+type Trade struct {
+	ID    int64   `json:"id"`
+	Side  string  `json:"side"`
+	Price float64 `json:"price"`
+	Size  float64 `json:"size"`
+	Time  string  `json:"time"`
+}
+
+type Candle struct {
+	StartTime string  `json:"startTime"`
+	Open      float64 `json:"open"`
+	Close     float64 `json:"close"`
+	High      float64 `json:"high"`
+	Low       float64 `json:"low"`
+	Volume    float64 `json:"volume"`
+}
+
+type GetOrderbookRequest struct {
+	MarketName string `json:"market_name"`
+	Depth      int    `json:"depth"` // default 20, max 100
+}
+
+type GetTradesRequest struct {
+	MarketName string `json:"market_name"`
+	Limit      int    `json:"limit"`      // default 20, max 100
+	StartTime  int64  `json:"start_time"` // epoch seconds
+	EndTime    int64  `json:"end_time"`   // epoch seconds
+}
+
+type GetCandlesRequest struct {
+	MarketName string `json:"market_name"`
+	Resolution int    `json:"resolution"` // seconds; 15, 60, 300, 900, 3600, 14400, 86400
+	Limit      int    `json:"limit"`      // default 20, max 100
+	StartTime  int64  `json:"start_time"` // epoch seconds
+	EndTime    int64  `json:"end_time"`   // epoch second
 }
 
 func (c *Client) GetMarket(marketName string) (*Market, error) {
@@ -47,16 +94,75 @@ func (c *Client) GetMarkets() ([]Market, error) {
 	return markets, nil
 }
 
-// func (c *Client) GetOrderbook() () {
-//
-// }
+func (c *Client) GetOrderbook(request GetOrderbookRequest) (*Orderbook, error) {
+	var orderbook Orderbook
+	getOrderbookEndpoint := orderbookEndpoint + "/" + request.MarketName + orderbookEndpoint
+	if request.Depth != 0 {
+		getOrderbookEndpoint += "/?depth=" + strconv.Itoa(request.Depth)
+	}
 
-// func (c *Client) GetTrades() () {
-//
-//}
+	err := c.get(getOrderbookEndpoint, &orderbook)
+	if err != nil {
+		return nil, err
+	}
 
-// todo
-// func (c *Client) GetHistoricalMarket() (*[]model.Market, error) {
-//	 markets := new([]model.Market)
-//
-// }
+	return &orderbook, nil
+}
+
+func (c *Client) GetTrades(request GetTradesRequest) ([]Trade, error) {
+	var trades []Trade
+	getTradesEndpoint := marketsEndpoint + "/" + request.MarketName + tradesEndpoint
+	if request.Limit != 0 || request.StartTime != 0 || request.EndTime != 0 {
+		getTradesEndpoint += "/?"
+	}
+
+	if request.Limit != 0 {
+		getTradesEndpoint += "limit=" + strconv.Itoa(request.Limit)
+	}
+
+	if request.StartTime != 0 {
+		getTradesEndpoint += "start_time=" + strconv.FormatInt(request.StartTime, 10)
+	}
+
+	if request.EndTime != 0 {
+		getTradesEndpoint += "end_time=" + strconv.FormatInt(request.EndTime, 10)
+	}
+
+	err := c.get(getTradesEndpoint, &trades)
+	if err != nil {
+		return nil, err
+	}
+
+	return trades, nil
+}
+
+func (c *Client) GetCandles(request GetCandlesRequest) ([]Candle, error) {
+	var candles []Candle
+	getCandlesEndpoint := marketsEndpoint + "/" + request.MarketName + candlesEndpoint
+	if request.Resolution != 0 || request.Limit != 0 || request.StartTime != 0 || request.EndTime != 0 {
+		getCandlesEndpoint += "/?"
+	}
+
+	if request.Resolution != 0 {
+		getCandlesEndpoint += "resolution=" + strconv.Itoa(request.Resolution)
+	}
+
+	if request.Limit != 0 {
+		getCandlesEndpoint += "limit=" + strconv.Itoa(request.Limit)
+	}
+
+	if request.StartTime != 0 {
+		getCandlesEndpoint += "start_time=" + strconv.FormatInt(request.StartTime, 10)
+	}
+
+	if request.EndTime != 0 {
+		getCandlesEndpoint += "end_time=" + strconv.FormatInt(request.EndTime, 10)
+	}
+
+	err := c.get(getCandlesEndpoint, &candles)
+	if err != nil {
+		return nil, err
+	}
+
+	return candles, nil
+}
