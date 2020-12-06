@@ -1,6 +1,9 @@
 package goftx
 
-import "strconv"
+import (
+	"log"
+	"strconv"
+)
 
 const (
 	marketsEndpoint   = "/markets"
@@ -26,7 +29,7 @@ type Market struct {
 	MinProvideSize float64 `json:"minProvideSize"`
 	Change1H       float64 `json:"change1h"`
 	Change24H      float64 `json:"change24h"`
-	ChangeBody     float64 `json:"changeBody"`
+	ChangeBod      float64 `json:"changeBod"`
 	Enabled        bool    `json:"enabled"`
 	Restricted     bool    `json:"restricted"`
 	PostOnly       bool    `json:"postOnly"`
@@ -55,23 +58,23 @@ type Candle struct {
 }
 
 type GetOrderbookRequest struct {
-	MarketName string `json:"market_name"`
-	Depth      int    `json:"depth"` // default 20, max 100
+	Market string
+	Depth  int // default 20, max 100
 }
 
 type GetTradesRequest struct {
-	MarketName string `json:"market_name"`
-	Limit      int    `json:"limit"`      // default 20, max 100
-	StartTime  int64  `json:"start_time"` // epoch seconds
-	EndTime    int64  `json:"end_time"`   // epoch seconds
+	Market    string
+	Limit     int   // default 20, max 100
+	StartTime int64 // epoch seconds
+	EndTime   int64 // epoch seconds
 }
 
 type GetCandlesRequest struct {
-	MarketName string `json:"market_name"`
-	Resolution int    `json:"resolution"` // seconds; 15, 60, 300, 900, 3600, 14400, 86400
-	Limit      int    `json:"limit"`      // default 20, max 100
-	StartTime  int64  `json:"start_time"` // epoch seconds
-	EndTime    int64  `json:"end_time"`   // epoch second
+	Market     string
+	Resolution int   // seconds; 15, 60, 300, 900, 3600, 14400, 86400
+	Limit      int   // default 20, max 100
+	StartTime  int64 // epoch seconds
+	EndTime    int64 // epoch second
 }
 
 func (c *Client) GetMarket(marketName string) (*Market, error) {
@@ -96,10 +99,12 @@ func (c *Client) GetMarkets() ([]Market, error) {
 
 func (c *Client) GetOrderbook(request GetOrderbookRequest) (*Orderbook, error) {
 	var orderbook Orderbook
-	getOrderbookEndpoint := orderbookEndpoint + "/" + request.MarketName + orderbookEndpoint
+	getOrderbookEndpoint := marketsEndpoint + "/" + request.Market + orderbookEndpoint
 	if request.Depth != 0 {
-		getOrderbookEndpoint += "/?depth=" + strconv.Itoa(request.Depth)
+		getOrderbookEndpoint += "?depth=" + strconv.Itoa(request.Depth)
 	}
+
+	log.Printf("%s", getOrderbookEndpoint)
 
 	err := c.get(getOrderbookEndpoint, &orderbook)
 	if err != nil {
@@ -111,21 +116,21 @@ func (c *Client) GetOrderbook(request GetOrderbookRequest) (*Orderbook, error) {
 
 func (c *Client) GetTrades(request GetTradesRequest) ([]Trade, error) {
 	var trades []Trade
-	getTradesEndpoint := marketsEndpoint + "/" + request.MarketName + tradesEndpoint
+	getTradesEndpoint := marketsEndpoint + "/" + request.Market + tradesEndpoint
 	if request.Limit != 0 || request.StartTime != 0 || request.EndTime != 0 {
-		getTradesEndpoint += "/?"
+		getTradesEndpoint += "?"
 	}
 
 	if request.Limit != 0 {
-		getTradesEndpoint += "limit=" + strconv.Itoa(request.Limit)
+		getTradesEndpoint += "&limit=" + strconv.Itoa(request.Limit)
 	}
 
 	if request.StartTime != 0 {
-		getTradesEndpoint += "start_time=" + strconv.FormatInt(request.StartTime, 10)
+		getTradesEndpoint += "&start_time=" + strconv.FormatInt(request.StartTime, 10)
 	}
 
 	if request.EndTime != 0 {
-		getTradesEndpoint += "end_time=" + strconv.FormatInt(request.EndTime, 10)
+		getTradesEndpoint += "&end_time=" + strconv.FormatInt(request.EndTime, 10)
 	}
 
 	err := c.get(getTradesEndpoint, &trades)
@@ -138,25 +143,25 @@ func (c *Client) GetTrades(request GetTradesRequest) ([]Trade, error) {
 
 func (c *Client) GetCandles(request GetCandlesRequest) ([]Candle, error) {
 	var candles []Candle
-	getCandlesEndpoint := marketsEndpoint + "/" + request.MarketName + candlesEndpoint
+	getCandlesEndpoint := marketsEndpoint + "/" + request.Market + candlesEndpoint
 	if request.Resolution != 0 || request.Limit != 0 || request.StartTime != 0 || request.EndTime != 0 {
-		getCandlesEndpoint += "/?"
+		getCandlesEndpoint += "?"
 	}
 
 	if request.Resolution != 0 {
-		getCandlesEndpoint += "resolution=" + strconv.Itoa(request.Resolution)
+		getCandlesEndpoint += "&resolution=" + strconv.Itoa(request.Resolution)
 	}
 
 	if request.Limit != 0 {
-		getCandlesEndpoint += "limit=" + strconv.Itoa(request.Limit)
+		getCandlesEndpoint += "&limit=" + strconv.Itoa(request.Limit)
 	}
 
 	if request.StartTime != 0 {
-		getCandlesEndpoint += "start_time=" + strconv.FormatInt(request.StartTime, 10)
+		getCandlesEndpoint += "&start_time=" + strconv.FormatInt(request.StartTime, 10)
 	}
 
 	if request.EndTime != 0 {
-		getCandlesEndpoint += "end_time=" + strconv.FormatInt(request.EndTime, 10)
+		getCandlesEndpoint += "&end_time=" + strconv.FormatInt(request.EndTime, 10)
 	}
 
 	err := c.get(getCandlesEndpoint, &candles)
